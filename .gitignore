@@ -15,7 +15,8 @@ dist-ssr
 filepathFolder
 zS
 
-*.zip
+work.zip
+work2.zip
 
 # Editor directories and files
 .vscode/*
