@@ -46,6 +46,7 @@ export default {
    data() {
       return {
          emailFields: [
+            "message-id",
             "to",
             "from",
             "subject",

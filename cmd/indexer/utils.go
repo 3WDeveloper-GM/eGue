@@ -145,18 +145,23 @@ func ConstructPayload(filePath, payloadPath string) error {
 	currentHeader := ""
 	for lineErr == nil {
 		currentline, lineErr = reader.ReadString('\n')
+		//fmt.Println(currentline)
 
-		if currentline == "\n" {
+		if currentline == "\r\n" {
 			separatorFound = true
 		}
 
 		if !separatorFound {
 
-			header := strings.Split(currentline, ":")[0]
-			_, ok := keyValuesArray[header]
+			headervalues := strings.Split(currentline, ":")
+			if len(headervalues) == 1 {
+				headervalues = append(headervalues, " ")
+			}
+
+			_, ok := keyValuesArray[headervalues[0]]
 			if ok {
-				keyValuesArray[header] = strings.Split(currentline, ":")[1]
-				currentHeader = header
+				keyValuesArray[headervalues[0]] = headervalues[1]
+				currentHeader = headervalues[0]
 			} else {
 				keyValuesArray[currentHeader] += " " + currentline
 			}

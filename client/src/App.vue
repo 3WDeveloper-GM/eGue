@@ -29,16 +29,46 @@
         </div>
       </div>
 
-        <component v-show="IsActive(item.name)" @page-change="changeActivePage('Search')"  @returnedMail="ReturnRow" :currentEmail="currentMail" v-for="item in pages" :is="item.component"></component>
+      <component v-show="IsActive(item.name)" :MaxResults="maxResults" :Field="selectedSearchField"  @page-change="changeActivePage('Search')"
+        @returnedMail="ReturnRow" :currentEmail="currentMail" v-for="item in pages" :is="item.component"></component>
 
     </div>
     <div class="drawer-side">
       <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-      <ul class="menu p-4 w-72 md:w-96 min-h-full bg-base-200 text-base-content">
+      <ul class="menu p-2 w-72 md:w-96 min-h-full bg-base-200 text-base-content items-center">
         <!-- Sidebar content here -->
-        <li><a>Sidebar Item 1</a></li>
-        <li><a>Sidebar Item 2</a></li>
+        <li>
+          <form @submit.prevent="" class="grid grid-rows-1 place-items-center">
+            <div class="grid grid-rows-2 place-items-center">
+              <i>
+                <label for="maxresults" class="capitalize text-gray-500"> Max results</label>
+              </i>
+              <i>
+                <input id="maxresults" type="number" placeholder="20"
+                  class="input input-bordered w-full max-w-xs md:max-w-md" v-model="maxResults" required />
+              </i>
+            </div>
 
+
+          </form>
+        </li>
+        <li>
+          <form @submit.prevent="" class="grid grid-rows-1">
+            <div class="grid grid-rows-2 place-items-center">
+              <i>
+                <label for="maxresults" class="capitalize text-gray-500"> Fields</label>
+              </i>
+              <i>
+                <select class="select select-bordered w-full max-w-xs md:max-w-md text-fourth" required>
+                  <option disabled selected value="">Search field</option>
+                  <option @click.prevent="changeSearchField(item)" v-for="(item, index) in searchFields" :key="index">
+                    {{ item }}
+                  </option>
+                </select>
+              </i>
+            </div>
+          </form>
+        </li>
       </ul>
     </div>
   </div>
@@ -59,12 +89,21 @@ export default {
   },
   data() {
     return {
-      currentPage:"Search",
-      currentMail:null,
+      maxResults: 20,
+      selectedSearchField: "",
+      currentPage: "Search",
+      currentMail: null,
       pages: [
         { name: "Search", component: "SearchPage" },
         { name: "Read Mail", component: "MailsPage" },
       ],
+      searchFields: [
+        "to",
+        "from",
+        "subject",
+        "cc",
+        "bcc",
+      ]
     }
   },
   methods: {
@@ -83,12 +122,15 @@ export default {
     ReturnRow(data) {
       this.changeActivePage(this.pages[1].name)
       this.currentMail = data
+    },
+    changeSearchField(item) {
+      this.selectedSearchField = item
     }
   },
 }
 </script>
 
-<style  scoped>
+<style scoped>
 .v-enter-active,
 .v-leave-active {
   transition: opacity 0.5s ease;

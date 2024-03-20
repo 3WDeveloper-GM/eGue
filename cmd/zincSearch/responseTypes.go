@@ -2,7 +2,7 @@ package zincsearch
 
 type Search struct {
 	Type       string   `json:"type"`
-	SearchTerm string   `json:"search_term"`
+	SearchTerm string   `json:"query"`
 	Field      string   `json:"field"`
 	SortFields []string `json:"sort_fields"`
 	From       int      `json:"from"`

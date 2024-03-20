@@ -1,19 +1,18 @@
 <template>
    <div>
-      <form @submit.prevent="searchInIndexer(searchQuery,searchType)">
+      <form @submit.prevent="searchInIndexer(searchQuery,searchType,MaxResults,Field)">
          <div
             class="grid grid-cols-[1fr,3fr,1fr] md:grid-cols-[9fr,21fr,9fr] grid-rows-2 text-fourth items-center text-center my-16 mx-4">
             <i></i>
             <i>
                <input type="text" placeholder="your query string here"
-                  class="input input-bordered w-full max-w-xs md:max-w-md" v-model="searchQuery" />
-
+                  class="input input-bordered w-full max-w-xs md:max-w-md" v-model="searchQuery" required />
             </i>
             <i></i>
             <i></i>
             <i>
-               <select class="select select-bordered w-full max-w-xs md:max-w-md text-fourth">
-                  <option disabled selected>Search Type</option>
+               <select class="select select-bordered w-full max-w-xs md:max-w-md text-fourth" required>
+                  <option disabled selected value="">Search Type</option>
                   <option @click="recordSearchType(item.key)" v-for="item in searchTypes" :key="item.key">{{ item.name
                      }}
                   </option>
@@ -79,6 +78,16 @@
 import axios from 'axios'
 
 export default {
+   props: {
+      MaxResults: {
+         type: Number,
+         default: 20
+      },
+      Field: {
+         type: String,
+         default: ""
+      }
+   },
    mounted() {
       this.getHealthCheck()
    },
@@ -125,13 +134,14 @@ export default {
       getHealthCheck() {
          axios.get('http://localhost:4040/api/healthcheck').then((response) => { console.log(response) }).catch((error) => { console.log(error) })
       },
-      searchInIndexer(searchQuery, searchType) {
+      searchInIndexer(searchQuery, searchType,MaxResults, Field) {
          axios.post('http://localhost:4040/api/search', {
             "type": searchType,
             "search_term": searchQuery,
+            "field":Field,
             "sort_fields": ["-_score"],
             "from": 0,
-            "max_results": 20,
+            "max_results": MaxResults,
             "_source": []
          }).then((response) => {this.ReturnedData = response.data.hits.hits }).catch((error) => { console.log(error) })
       }
