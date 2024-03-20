@@ -10,7 +10,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type Config struct {
@@ -21,7 +22,8 @@ type Config struct {
 	AdminPassword string
 }
 
-var wg sync.WaitGroup
+// var wg sync.WaitGroup
+var eg errgroup.Group
 
 func FileCrawl(root, path string, config *Config) (int64, error) {
 
@@ -37,12 +39,14 @@ func FileCrawl(root, path string, config *Config) (int64, error) {
 
 		if (counter+1)%chunkSize == 0 {
 
-			wg.Wait()
+			if err := eg.Wait(); err != nil {
+				log.Fatal(err)
+				return err
+			}
 			log.Println("Sending...")
 			for index := 0; index < blockSize; index++ {
-				wg.Add(1)
-				go func() error {
-					defer wg.Done()
+				eg.Go(func() error {
+					//defer wg.Done()
 					err := SendPayload(config, index)
 					if err != nil {
 						log.Fatal(err)
@@ -55,15 +59,20 @@ func FileCrawl(root, path string, config *Config) (int64, error) {
 						return err
 					}
 					return nil
-				}()
+				})
+
 			}
-			wg.Wait()
+			if err := eg.Wait(); err != nil {
+				log.Fatal(err)
+				return err
+			}
 		}
 
 		if !dirEntry.IsDir() {
-			wg.Add(1)
 			completePath := fmt.Sprintf(config.PayloadPath+"%d"+".ndjson", counter%int64(blockSize))
-			go ConstructPayload(path, completePath)
+			eg.Go(func() error {
+				return ConstructPayload(path, completePath)
+			})
 			counter++
 		}
 		return err
@@ -99,7 +108,7 @@ func FileCrawl(root, path string, config *Config) (int64, error) {
 
 func ConstructPayload(filePath, payloadPath string) error {
 
-	defer wg.Done()
+	//defer wg.Done()
 
 	keyValuesArray := map[string]string{
 		"Message-ID":                "",
@@ -127,15 +136,17 @@ func ConstructPayload(filePath, payloadPath string) error {
 	}
 	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
+	reader := bufio.NewReader(file)
 	var emailbody strings.Builder
+	var currentline string
+	var lineErr error
 
 	separatorFound := false
 	currentHeader := ""
-	for scanner.Scan() {
-		currentline := scanner.Text()
+	for lineErr == nil {
+		currentline, lineErr = reader.ReadString('\n')
 
-		if currentline == "" {
+		if currentline == "\n" {
 			separatorFound = true
 		}
 
@@ -202,7 +213,7 @@ func ConstructPayload(filePath, payloadPath string) error {
 		return err
 	}
 
-	return scanner.Err()
+	return nil
 }
 
 func SendPayload(config *Config, index int) error {
