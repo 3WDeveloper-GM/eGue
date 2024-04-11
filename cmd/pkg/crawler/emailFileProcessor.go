@@ -41,6 +41,9 @@ func NewMailProcessor(logger FileLogger) *emailProcessor {
 	return &emailProcessor{processedcount: 0, logger: logger}
 }
 
+// emailProcessor.Process: This function implements the Process() method from the Processor interface
+// in this context, this implementation processes each file in the file tree and creates a .ndjson payload
+// that is being sent to the ZincSearch database, this is the second stage in the data pipeline.
 func (ep *emailProcessor) Process(ctx context.Context, p pipes.Payload) (pipes.Payload, error) {
 	payload := p.(*crawlerPayload)
 

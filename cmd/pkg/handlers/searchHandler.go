@@ -23,6 +23,9 @@ func NewSearchHandler(searcher DBSearch, io jsonio.JsonIORW) *SearchHandler {
 	}
 }
 
+// SearchMails: This handler has the responsability to read the json payload
+// from the client, validate said payload and run the Search() method from the
+// DBSearch interface.
 func (sh *SearchHandler) SearchMails(w http.ResponseWriter, r *http.Request) {
 	var input zs.SearchRequest
 

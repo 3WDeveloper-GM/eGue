@@ -16,6 +16,8 @@ func NewLogger(file *os.File) *FileLogger {
 	return flogger
 }
 
+// Log: logs into a file, in this demo i'll use a generic logfile
+// in order to show the instructions that are executed by the indexer
 func (log *FileLogger) Log(message string) {
 	log.log.Println(message)
 }

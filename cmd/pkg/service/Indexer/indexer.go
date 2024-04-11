@@ -13,7 +13,9 @@ import (
 
 var mailsPath = domain.MailDir
 
-// this is a blueprint for what an indexer should do
+// MailIndexerService: is a service for the Index handler in the application
+// this struct implements the methods required to make it a DBIndex compatible
+// object.
 type MailIndexerService struct {
 	crawler *crawler.Crawler
 	source  *crawler.FileSource
@@ -30,6 +32,9 @@ func NewMailIndexer(config adapter.DBImplementation, client *adapter.SearchAdapt
 	}
 }
 
+// Index: this function implements the Index method from the DBIndex interface
+// it checks first if there are entries in the database and if there are no entries
+// it doesn't do anything.
 func (mi *MailIndexerService) Index(ctx context.Context, root string) error {
 
 	url := mi.config.GetDBURL() + "index"

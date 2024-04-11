@@ -15,11 +15,13 @@ type ErrResponse struct {
 	ErrorText  string `json:"error,omitempty"`
 }
 
+// Render: implements the Render method in order to send responses to the client
 func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	render.Status(r, e.HTTPStatusCode)
 	return nil
 }
 
+// ErrInvalidRequest: implements a http error 400 response.
 func ErrInvalidRequest(err error) render.Renderer {
 	return &ErrResponse{
 		Err:            err,
@@ -29,6 +31,7 @@ func ErrInvalidRequest(err error) render.Renderer {
 	}
 }
 
+// NewErrorResponse: implements an error response that is being sent to the client.
 func NewErrorResponse(w http.ResponseWriter, r *http.Request, statusCode int, err error) {
 	errorResponse := &ErrResponse{
 		Err:            err,

@@ -11,6 +11,8 @@ import (
 	"github.com/3WDeveloper-GM/pipeline/cmd/pkg/domain"
 )
 
+// SearchMapper is a service struct for getting a request from
+// the client and moving it to ZincSearch
 type SearchMapper struct {
 	adapter adapter.SearchAdapter
 	cfg     adapter.DBImplementation
@@ -28,6 +30,10 @@ func (sm *SearchMapper) SetInput(input zs.SearchRequest) {
 	sm.input = input
 }
 
+// Search: this function gets an input from the handler after it has
+// been validated and then it marshals the response in a format that
+// zincsearch can understand, this implements the Search method from
+// the DBSearch interface.
 func (sm *SearchMapper) Search(index string) ([]domain.Email, error) {
 
 	var response zs.SearchResponse
@@ -35,8 +41,6 @@ func (sm *SearchMapper) Search(index string) ([]domain.Email, error) {
 	// using a map is more convenient than using a string
 	// with this method is easier to create a request that
 	// zincSearch can understand
-
-	//log.Println(sm)
 
 	requestBody := map[string]interface{}{
 		"search_type": sm.input.Type,
@@ -54,11 +58,7 @@ func (sm *SearchMapper) Search(index string) ([]domain.Email, error) {
 		return nil, err
 	}
 
-	//log.Println(string(jsonBytes))
-
 	url := sm.cfg.GetDBURL() + index + "/_search"
-
-	//log.Println(url)
 
 	req, err := sm.adapter.Generate(http.MethodPost, url, bytes.NewBuffer(jsonBytes))
 	if err != nil {
@@ -80,8 +80,6 @@ func (sm *SearchMapper) Search(index string) ([]domain.Email, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	//log.Println(response)
 
 	return sm.mapMails(&response)
 }

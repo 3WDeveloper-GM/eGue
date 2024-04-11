@@ -17,6 +17,9 @@ func NewIndexHandler(indexer DBIndex) *IndexHandler {
 	return &IndexHandler{indexer: indexer}
 }
 
+// IndexMails: the handler gets the necessary parameters in order to run the
+// Index() method that is part of the DBIndex interface. When the payload is
+// sent, it sends a message to the client signaling that the mails are indexed.
 func (ih *IndexHandler) IndexMails(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)

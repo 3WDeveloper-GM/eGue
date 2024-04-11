@@ -7,6 +7,9 @@ import (
 	Validator "github.com/3WDeveloper-GM/pipeline/cmd/pkg/domain/validator"
 )
 
+// ValidateInput: This function validates the input from the client, this
+// ensures that all the required parameters that the backend needs to perform
+// the request to the Database are met.
 func ValidateInput(v *Validator.Validator, input *zs.SearchRequest) bool {
 
 	section := "search_type"
