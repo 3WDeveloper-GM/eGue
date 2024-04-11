@@ -1,44 +1,39 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
-	"github.com/go-chi/render"
+	"github.com/3WDeveloper-GM/pipeline/cmd/pkg/jsonio"
 )
 
-type ErrResponse struct {
-	Err            error `json:"-"`
-	HTTPStatusCode int   `json:"-"`
-
-	StatusText string `json:"status"`
-	AppCode    int64  `json:"code,omitempty"`
-	ErrorText  string `json:"error,omitempty"`
+type errResponse struct {
+	io jsonio.JsonIORW
 }
 
-// Render: implements the Render method in order to send responses to the client
-func (e *ErrResponse) Render(w http.ResponseWriter, r *http.Request) error {
-	render.Status(r, e.HTTPStatusCode)
-	return nil
+func NewErrResponse(io jsonio.JsonIORW) *errResponse {
+	return &errResponse{io: io}
 }
 
-// ErrInvalidRequest: implements a http error 400 response.
-func ErrInvalidRequest(err error) render.Renderer {
-	return &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: 400,
-		StatusText:     "Invalid request.",
-		ErrorText:      err.Error(),
+func (errR *errResponse) errorResponse(w http.ResponseWriter, r *http.Request, status int, message interface{}) {
+	envelope := map[string]interface{}{
+		"error": message,
+	}
+
+	err := errR.io.WriteJSON(w, status, envelope, nil)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(500)
 	}
 }
 
-// NewErrorResponse: implements an error response that is being sent to the client.
-func NewErrorResponse(w http.ResponseWriter, r *http.Request, statusCode int, err error) {
-	errorResponse := &ErrResponse{
-		Err:            err,
-		HTTPStatusCode: statusCode,
-		ErrorText:      err.Error(),
-	}
+func (errR *errResponse) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+	log.Println(err)
 
-	render.Status(r, statusCode)
-	render.JSON(w, r, errorResponse)
+	message := "the server encountered a problem and could not process your request."
+	errR.errorResponse(w, r, http.StatusInternalServerError, message)
+}
+
+func (errR *errResponse) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
+	errR.errorResponse(w, r, http.StatusBadRequest, err)
 }

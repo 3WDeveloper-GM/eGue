@@ -6,20 +6,21 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-chi/render"
+	"github.com/3WDeveloper-GM/pipeline/cmd/pkg/jsonio"
 )
 
 type IndexHandler struct {
 	indexer DBIndex
+	io      jsonio.JsonIORW
 }
 
-func NewIndexHandler(indexer DBIndex) *IndexHandler {
-	return &IndexHandler{indexer: indexer}
+func NewIndexHandler(indexer DBIndex, io jsonio.JsonIORW) *IndexHandler {
+	return &IndexHandler{indexer: indexer, io: io}
 }
 
-// IndexMails: the handler gets the necessary parameters in order to run the
-// Index() method that is part of the DBIndex interface. When the payload is
-// sent, it sends a message to the client signaling that the mails are indexed.
+// IndexMails runs the Index() method that is specified by the DBIndex() interface
+// this method is for demoing purposes, the best way to index emails is still running
+// the indexer binary generated in the indexer_standalone part of the crawler package.
 func (ih *IndexHandler) IndexMails(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Minute)
@@ -27,19 +28,25 @@ func (ih *IndexHandler) IndexMails(w http.ResponseWriter, r *http.Request) {
 
 	root, err := os.Getwd()
 	if err != nil {
-		NewErrorResponse(w, r, http.StatusInternalServerError, err)
+		responser := NewErrResponse(ih.io)
+		responser.serverErrorResponse(w, r, err)
 		return
 	}
 
 	err = ih.indexer.Index(ctx, root)
 	if err != nil {
-		NewErrorResponse(w, r, http.StatusInternalServerError, err)
+		responser := NewErrResponse(ih.io)
+		responser.serverErrorResponse(w, r, err)
 	}
 
 	response := map[string]interface{}{
 		"sent": true,
 	}
 
-	render.JSON(w, r, response)
+	err = ih.io.WriteJSON(w, http.StatusOK, response, nil)
+	if err != nil {
+		responser := NewErrResponse(ih.io)
+		responser.serverErrorResponse(w, r, err)
+	}
 
 }

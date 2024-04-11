@@ -15,7 +15,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/go-chi/render"
 )
 
 const (
@@ -68,7 +67,7 @@ func (a *Application) setupDepends() {
 	io := jsonio.NewJSONIO()
 
 	shandler := handlers.NewSearchHandler(searchService, io)
-	indexHandler := handlers.NewIndexHandler(indexService)
+	indexHandler := handlers.NewIndexHandler(indexService, io)
 
 	a.dependencies = &dependency{
 		searchHandler: shandler,
@@ -90,7 +89,6 @@ func (a *Application) setServer() {
 	}))
 	a.server.Use(middleware.Logger)
 	a.server.Use(middleware.Recoverer)
-	a.server.Use(render.SetContentType(render.ContentTypeJSON))
 
 	a.setRoutes()
 }
