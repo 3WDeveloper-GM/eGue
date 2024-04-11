@@ -23,3 +23,15 @@ Engineering with Golang**.
 In that book, precisely in chapter 7, you learn to build a data processing pipeline from scratch, using only go primitives like channels and goroutines in order to create a pipeline that processes files or data (well, there´s a caveat, the pipeline shown is just the wrapper, you have to implement the logic for your use case youself, but it's a great start and totally recommend the textbook). So with that, I started to implement my own pipeline. I have included a diagram that illustrates how it works.
 
 ![image](../../../images/diagram.jpg)
+
+As you can see, the pipeline has a really simple design. It just consists of 5 relevant items, the source, three processing stages, and a sink. Each stage is connected to it's next stage by an input channel.
+
+ The first stage is the input of the pipeline and feeds the data that the pipeline implementation needs to process. The second, third and fourth stages are _worker pools_ that use a set number of processors concurrently in order to process the data without regarding the order in which in arrives to the stage. What these processors do is explained in the next paragraphs. And finally, we have an output sink; that due to our usecase, just marks the payload as processed and discards it.
+
+I'll try to explain how I implemented the pipeline in the following steps:
+
+1. The pipeline needs an input to work, or in the lingo, _a source_, in our particular case, the source is a string slice that has the paths for every directory in the ```maildir``` directory. You can think of it as encoding the paths for all the users directories, with their inbox and sent emails, for example.
+2. Then the input is passed to the first processing stage, the _**Path extractor**_ stage. This stage just classifies each file in each user directory whether a file is an email or not and gets the path to the email. All of the email paths are stored in another slice for further processing.
+3. The resulting paths are passed to the second stage, the _**File Processor**_ stage. In this stage, each email is parsed, processed, formatted and aggregated into a payload that ZincSearch accepts. Because I used the ```_bulk``` api endpoint from ZincSearch, you need to encode all the emails into an ```.ndjson``` file.
+4. Then, the payload is passed and sent by the third stage, the _**Payload Sender**_, in this stage, the payload is added as the body of an http request (with all the necessary headers) and sent to ZincSearch.
+5. Finally, the sink just marks each payload as processed and discards it, this is performed in order to help the GC infer that we no longer need the memory allocated to the payload. 
