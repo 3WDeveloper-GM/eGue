@@ -14,8 +14,8 @@ dist-ssr
 
 /enron_mail_20110402
 
-work.zip
-work2.zip
+*.zip
+*.gz
 
 # Editor directories and files
 .vscode/*
