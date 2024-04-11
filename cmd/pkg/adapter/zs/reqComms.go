@@ -1,8 +1,7 @@
 package zs
 
-//	less is more, with only these parameters
-//
-// it can search confortably in the ZS engine
+// SearchRequest is used to marshal a client request into
+// a ZincSearch compatible request after validation.
 type SearchRequest struct {
 	Type   string `json:"type"`
 	Query  string `json:"query"`

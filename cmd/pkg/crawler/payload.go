@@ -24,6 +24,9 @@ type crawlerPayload struct {
 	RawContent         bytes.Buffer
 }
 
+// Clone is returns a cloned instance of a pipes.Payload object, this
+// is done in order to do Parallel operations with multiple processors
+// in 1-N Broadcast stages as implemented in the pipes.pipeline package.
 func (p *crawlerPayload) Clone() pipes.Payload {
 	// cloning all the fields into a new crawlerPayload
 	newPayload := payloadPool.Get().(*crawlerPayload)
@@ -52,6 +55,9 @@ func (p *crawlerPayload) Clone() pipes.Payload {
 	return newPayload
 }
 
+// MaskAsProcessed is a function that returns a pipes.Payload object
+// to the payload pool. This ensures that the objects are collected by
+// go's GC in a more efficient manner.
 func (p *crawlerPayload) MarkAsProcessed() {
 	p.filePath = p.filePath[:0]
 	p.RawContent.Reset()

@@ -13,8 +13,8 @@ import (
 	"github.com/3WDeveloper-GM/pipeline/cmd/pkg/crawler/pipes"
 )
 
-// this type implements the Process() method, from the
-// processor type in order to index each and every payload into
+// mailIndexer holds the fields necessary in order to send payloads
+// to ZinkSearch and index them correctly.
 type mailIndexer struct {
 	cfg        adapter.DBImplementation
 	postClient PostClient
@@ -32,6 +32,9 @@ func NewMailIndexer(cfg adapter.DBImplementation, client PostClient, logger File
 	}
 }
 
+// mailIndexerProcess indexes a block of emails from a certain user in the mailDir directory.
+// It generates a request that will be sent to the /_bulk endpoint in the ZIncSearch Database
+// for bulk ingestion of data.
 func (mi *mailIndexer) Process(ctx context.Context, p pipes.Payload) (pipes.Payload, error) {
 	payload := p.(*crawlerPayload)
 
@@ -43,7 +46,7 @@ func (mi *mailIndexer) Process(ctx context.Context, p pipes.Payload) (pipes.Payl
 		return nil, err
 	}
 
-	req.Header.Set("Content-Encoding", "gzip")
+	//req.Header.Set("Content-Encoding", "gzip")
 
 	resp, err := mi.postClient.Do(req)
 	if err != nil {

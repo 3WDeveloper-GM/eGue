@@ -23,6 +23,9 @@ func NewAdapter(client *http.Client, config DBImplementation) *SearchAdapter {
 	}
 }
 
+// Generate returns an http client compatible request.
+// This request has the necessary headers in order to be accepted by zincsearch.
+// This method accepts both the http.MethodGet and http.MethodPost methods.
 func (za *SearchAdapter) Generate(method string, url string, body io.Reader) (*http.Request, error) {
 	var request *http.Request
 	var err error
@@ -58,6 +61,9 @@ func (za *SearchAdapter) Generate(method string, url string, body io.Reader) (*h
 	return request, nil
 }
 
+// Do is a wrapper on top of the http.client object that performs an http request
+// to the server. It returns an *http.Response object and an error. It implements
+// this method to be compatible with the PostClient interface present in the crawler.
 func (za *SearchAdapter) Do(request *http.Request) (*http.Response, error) {
 	return za.client.Do(request)
 }

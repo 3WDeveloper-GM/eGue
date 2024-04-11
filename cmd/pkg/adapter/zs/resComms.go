@@ -1,5 +1,7 @@
 package zs
 
+// Search Response implements the response given by Zincsearch
+// due to a valid search request.
 type SearchResponse struct {
 	Hits struct {
 		Hits []struct {

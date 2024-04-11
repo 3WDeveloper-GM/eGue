@@ -28,9 +28,10 @@ var maxSize = 1024
 // var escapePattern = regexp.MustCompile(`(\\u003[0-z])+`)
 //var tildePattern = regexp.MustCompile(`\s+`)
 
-// email processor is the pipeline stage that does the email parsing and
-// marshalling into a /api/_bulk compatible payload for sending into the
-// zincsearch database.
+// emailProcessor is a struct that implements the Process() method
+// for the second stage of the data processing pipeline, the processedCorrectly
+// field reports how many blocks have been processed and the
+// processedcount field reposrts the amount of processed emails per block
 type emailProcessor struct {
 	processedCorrectly int
 	processedcount     int
@@ -41,9 +42,9 @@ func NewMailProcessor(logger FileLogger) *emailProcessor {
 	return &emailProcessor{processedcount: 0, logger: logger}
 }
 
-// emailProcessor.Process: This function implements the Process() method from the Processor interface
-// in this context, this implementation processes each file in the file tree and creates a .ndjson payload
-// that is being sent to the ZincSearch database, this is the second stage in the data pipeline.
+// emailProcesssor.Process returns a payload with all the processed emails correctly formatted
+// in order to be indexed into Zincsearch. If at any moment, for some reason, the processing job fails
+// the payload is discarded altogether and the pipeline processes the next one.
 func (ep *emailProcessor) Process(ctx context.Context, p pipes.Payload) (pipes.Payload, error) {
 	payload := p.(*crawlerPayload)
 

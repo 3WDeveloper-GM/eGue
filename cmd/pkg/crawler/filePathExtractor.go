@@ -11,22 +11,20 @@ import (
 	"github.com/3WDeveloper-GM/pipeline/cmd/pkg/crawler/pipes"
 )
 
-var minCap = 16
-
 type filepathExtractor struct {
-	minCapacity int
-	log         FileLogger
+	processedAmount int
+	log             FileLogger
 }
 
 func NewFilepathExtractor(logger FileLogger) *filepathExtractor {
-	return &filepathExtractor{minCapacity: minCap, log: logger}
+	return &filepathExtractor{log: logger, processedAmount: 0}
 }
 
-// the file extractor is a processor that extracts the mail files from a certain directory
-// given by the payload rootdir field.
+// filepathExtractor.Process generates a set of file paths to valid email files located in
+// the mailDir directory inside the mails directory. These file paths are later used to locate
+// each email to be processed later in the pipeline.
 func (fe *filepathExtractor) Process(ctx context.Context, p pipes.Payload) (pipes.Payload, error) {
 	payload := p.(*crawlerPayload)
-	counter := 0
 	var files strings.Builder
 
 	fe.log.Log(fmt.Sprintf("processing in %s", payload.rootdir))
@@ -37,7 +35,7 @@ func (fe *filepathExtractor) Process(ctx context.Context, p pipes.Payload) (pipe
 		}
 
 		if !d.IsDir() {
-			counter++
+			fe.processedAmount++
 			files.WriteString(path + " ")
 		}
 		return nil
@@ -56,6 +54,7 @@ func (fe *filepathExtractor) Process(ctx context.Context, p pipes.Payload) (pipe
 		return nil, nil
 	}
 
-	fe.log.Log(fmt.Sprintf("finished extracting file names from %s, amount of extracted file names: %d", payload.rootdir, counter))
+	successMessage := fmt.Sprintf("extracted from %s, total file names: %d", payload.rootdir, fe.processedAmount)
+	fe.log.Log(successMessage)
 	return payload, nil
 }
