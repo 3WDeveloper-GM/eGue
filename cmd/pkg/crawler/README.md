@@ -2,7 +2,7 @@
 
 First, let´s define what the Indexer does, in the simplest terms, the indexer must do three things:
 
-1. It must get all the paths in a filesystem that corresponds to a valid email file, so, this stage needs a root directory that can be specified by the user and a way to traverse said directory, for the latter process, you can use the ```filepath.Walkdir() function``` that traverses the directory and can tell whether or not a file is a directory or not.
+1. It must get all the paths in a filesystem that corresponds to a valid email file, so, this stage needs a root directory that can be specified by the user and a way to traverse said directory, for the latter process, you can use the ```filepath.Walkdir()``` function that traverses the directory and can tell whether or not a file is a directory or not.
 2. It must parse the mails in order to extract the relevant information, such as the normal headers (such as date, from, to, body...) and the X-headers. This process can take a long time, so we must find a way to exploit ```go's``` capabilities in concurrent processing in order to process multiple files in an async manner. This stage can also include the encoding of the processed files into a payload format that can be accepted by our database.
 3. It must send all the encoded payloads into out database using the protocols that said database accepts, such as SQL queries or other methods. In this case, ZincSearch uses simple http requests for that.
 
@@ -20,5 +20,6 @@ As you can see, the first version of the crawler was really simple, but because 
 Aside from those concerns I also thought that the method for the processing was too tightly coupled to the application, such that it could need a total rewrite in the future (spoiler alert, it did), if the database or other external factor changed. So, I looked for alternatives that allowed me to architect some of the components of the indexer in a way that was more flexible. That ended up with me stumbling with a book by _Achilleas Anagnostopoulos_ called **Hands-On Software
 Engineering with Golang**.
 
-In that book, precisely in chapter 7, you learn to build a data processing pipeline from scratch, using only go primitives like channels and goroutines in order to create a pipeline that processes files or data (well, there´s a caveat, the pipeline shown is just the wrapper, you have to implement the logic for your use case youself, but it's a great start and totally recommend the textbook). So with that, I started to implement my own pipeline.
+In that book, precisely in chapter 7, you learn to build a data processing pipeline from scratch, using only go primitives like channels and goroutines in order to create a pipeline that processes files or data (well, there´s a caveat, the pipeline shown is just the wrapper, you have to implement the logic for your use case youself, but it's a great start and totally recommend the textbook). So with that, I started to implement my own pipeline. I have included a diagram that illustrates how it works.
 
+[image](../../../images/diagram.jpg)
