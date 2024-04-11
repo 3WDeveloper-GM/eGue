@@ -22,4 +22,4 @@ Engineering with Golang**.
 
 In that book, precisely in chapter 7, you learn to build a data processing pipeline from scratch, using only go primitives like channels and goroutines in order to create a pipeline that processes files or data (well, there´s a caveat, the pipeline shown is just the wrapper, you have to implement the logic for your use case youself, but it's a great start and totally recommend the textbook). So with that, I started to implement my own pipeline. I have included a diagram that illustrates how it works.
 
-[image](../../../images/diagram.jpg)
+![image](../../../images/diagram.jpg)
