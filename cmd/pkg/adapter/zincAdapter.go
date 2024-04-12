@@ -1,10 +1,9 @@
 package adapter
 
 import (
+	"errors"
 	"io"
 	"net/http"
-
-	"golang.org/x/xerrors"
 )
 
 var contentType = "application/json"
@@ -55,7 +54,7 @@ func (za *SearchAdapter) Generate(method string, url string, body io.Reader) (*h
 		request.SetBasicAuth(za.cfg.GetDBAdmin(), za.cfg.GetDBPassword())
 
 	default:
-		err = xerrors.Errorf("method not valid: only POST methods are used")
+		err = errors.New("method not valid: only POST and GET methods allowed")
 		return nil, err
 	}
 	return request, nil

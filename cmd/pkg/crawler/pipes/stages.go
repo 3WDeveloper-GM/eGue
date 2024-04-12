@@ -2,9 +2,8 @@ package pipes
 
 import (
 	"context"
+	"fmt"
 	"sync"
-
-	"golang.org/x/xerrors"
 )
 
 // first in - first out, simple implementation for something that needs to
@@ -31,7 +30,8 @@ func (r fifo) Run(ctx context.Context, parameters StageParameters) {
 
 			payloadOut, err := r.proc.Process(ctx, payloadIn)
 			if err != nil {
-				wrappedErr := xerrors.Errorf("pipeline stage %d: %w", parameters.StageIndex(), err)
+				wrapper := "pipeline stage %d : %w"
+				wrappedErr := fmt.Errorf(wrapper, parameters.StageIndex(), err)
 				maybeEmitError(wrappedErr, parameters.Error())
 				return
 			}
@@ -134,7 +134,8 @@ stop:
 				}()
 				payloadOut, err := d.proc.Process(ctx, payloadIn)
 				if err != nil {
-					wrappedErr := xerrors.Errorf("pipeline stage %d: %w", parameters.StageIndex(), err)
+					wrapper := "pipeline stage %d: %w"
+					wrappedErr := fmt.Errorf(wrapper, parameters.StageIndex(), err)
 					maybeEmitError(wrappedErr, parameters.Error())
 					return
 				}

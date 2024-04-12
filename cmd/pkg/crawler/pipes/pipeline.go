@@ -3,9 +3,8 @@ package pipes
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
-
-	"golang.org/x/xerrors"
 )
 
 var _ StageParameters = (*workerParameters)(nil)
@@ -118,7 +117,8 @@ func sinkWorker(ctx context.Context, sink Sink, inCh <-chan Payload, errCh chan<
 			}
 
 			if err := sink.Consume(ctx, payload); err != nil {
-				wrappedErr := xerrors.Errorf("pipeline sink : %w", err)
+				wrapper := "pipeline sink : %w"
+				wrappedErr := fmt.Errorf(wrapper, err)
 				maybeEmitError(wrappedErr, errCh)
 				return
 			}
@@ -142,7 +142,8 @@ func sourceWorker(ctx context.Context, source Source, outCh chan<- Payload, errC
 	}
 
 	if err := source.Error(); err != nil {
-		wrappedErr := xerrors.Errorf("pipeline source %w", err)
+		wrapper := "pipeline source : %w"
+		wrappedErr := fmt.Errorf(wrapper, err)
 		maybeEmitError(wrappedErr, errCh)
 	}
 }

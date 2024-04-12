@@ -15,6 +15,7 @@ func NewErrResponse(io jsonio.JsonIORW) *errResponse {
 	return &errResponse{io: io}
 }
 
+// errorResponse is a generic function to send error responses back to the client.
 func (errR *errResponse) errorResponse(w http.ResponseWriter, r *http.Request, status int, message interface{}) {
 	envelope := map[string]interface{}{
 		"error": message,
@@ -22,11 +23,12 @@ func (errR *errResponse) errorResponse(w http.ResponseWriter, r *http.Request, s
 
 	err := errR.io.WriteJSON(w, status, envelope, nil)
 	if err != nil {
-		log.Println(err)
+		log.Println(r, err)
 		w.WriteHeader(500)
 	}
 }
 
+// serverErrorResponse sends responses with an error 500.
 func (errR *errResponse) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	log.Println(err)
 
@@ -34,6 +36,7 @@ func (errR *errResponse) serverErrorResponse(w http.ResponseWriter, r *http.Requ
 	errR.errorResponse(w, r, http.StatusInternalServerError, message)
 }
 
+// badRequestResponse sends responses with an error 400.
 func (errR *errResponse) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
 	errR.errorResponse(w, r, http.StatusBadRequest, err)
 }

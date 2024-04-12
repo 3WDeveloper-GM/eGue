@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"net/http"
-
-	"github.com/go-chi/render"
 )
 
 // HealthCheckHandler returns a response whether or not the backend is live.
@@ -12,5 +10,10 @@ func (sh *SearchHandler) HealthCheckHandler(w http.ResponseWriter, r *http.Reque
 		"status": "available",
 	}
 
-	render.JSON(w, r, response)
+	err := sh.io.WriteJSON(w, http.StatusOK, response, nil)
+	if err != nil {
+		responser := NewErrResponse(sh.io)
+		responser.serverErrorResponse(w, r, err)
+		return
+	}
 }

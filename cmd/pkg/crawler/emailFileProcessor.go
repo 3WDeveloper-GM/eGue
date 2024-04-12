@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/3WDeveloper-GM/pipeline/cmd/pkg/crawler/pipes"
-	"golang.org/x/xerrors"
 )
 
 // CONSTANTS
@@ -81,7 +80,8 @@ func (ep *emailProcessor) Process(ctx context.Context, p pipes.Payload) (pipes.P
 
 		email, err := os.Open(file)
 		if err != nil {
-			wrapperError := xerrors.Errorf("found some anomaly in the path %s with the index %d : %w", file, index, err)
+			wrapped := "cannot open file %s: %w"
+			wrapperError := fmt.Errorf(wrapped, file, err)
 			return nil, wrapperError
 		}
 		defer email.Close()

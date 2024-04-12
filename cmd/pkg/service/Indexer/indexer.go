@@ -2,13 +2,13 @@ package indexer
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/3WDeveloper-GM/pipeline/cmd/pkg/adapter"
 	"github.com/3WDeveloper-GM/pipeline/cmd/pkg/crawler"
 	"github.com/3WDeveloper-GM/pipeline/cmd/pkg/domain"
 	"github.com/3WDeveloper-GM/pipeline/cmd/pkg/logger"
-	"github.com/go-chi/render"
 )
 
 var mailsPath = domain.MailDir
@@ -54,7 +54,10 @@ func (mi *MailIndexerService) Index(ctx context.Context, root string) error {
 		} `json:"page"`
 	}
 
-	render.DecodeJSON(resp.Body, total)
+	err = json.NewDecoder(resp.Body).Decode(&total)
+	if err != nil {
+		return err
+	}
 
 	if total.Page.Total == 0 {
 		maildirs := root + mailsPath
