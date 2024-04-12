@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime/pprof"
 	"time"
 
 	"github.com/3WDeveloper-GM/pipeline/cmd/app"
@@ -17,6 +18,15 @@ import (
 // With this we can estimate how the tool performs on its own.
 
 func main() {
+
+	cpu, err := os.Create("cpuProfile.perf")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	pprof.StartCPUProfile(cpu)
+	defer pprof.StopCPUProfile()
 
 	config := app.NewZsConfiguration()
 	transport := http.DefaultTransport.(*http.Transport).Clone()
